@@ -11,7 +11,9 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.0",
-    "react-s-alert": "^1.4.1"
+    "react-s-alert": "^1.4.1",
+    "styled-components": "^4.2.0",
+    "tar": "^4.4.8"
   },
   "devDependencies": {
     "eslint": "^5.16.0",

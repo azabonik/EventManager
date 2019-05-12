@@ -176,7 +176,9 @@ class EventForm extends React.Component {
           </div>
           <div className="form-actions">
             <button type="submit">Save</button>
-            <Link to={cancelURL}>Cancel</Link>
+            <button type="button" className="cancel">
+              <Link style={{ color: 'white ' }} to={cancelURL}>Cancel</Link>
+            </button>
           </div>
         </form>
       </div>
