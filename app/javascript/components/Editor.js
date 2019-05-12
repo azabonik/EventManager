@@ -1,10 +1,14 @@
 import React from 'react';
 import axios from 'axios';
+import PropTypes from 'prop-types';
+import { Switch } from 'react-router-dom';
 import Header from './Header';
 import EventList from './EventList';
-import PropTypes from 'prop-types';
 import PropsRoute from './PropsRoute';
 import Event from './Event';
+import EventForm from './EventForm';
+import { handleAjaxError } from '../helpers/helpers';
+import { success } from '../helpers/notifications';
 
 class Editor extends React.Component {
   constructor(props) {
@@ -13,15 +17,65 @@ class Editor extends React.Component {
     this.state = {
       events: null,
     };
+    this.deleteEvent = this.deleteEvent.bind(this);
+    this.addEvent = this.addEvent.bind(this);
+    this.updateEvent = this.updateEvent.bind(this);
   }
 
   componentDidMount() {
     axios
       .get('/api/events.json')
       .then(response => this.setState({ events: response.data }))
-      .catch((error) => {
-        console.log(error);
-      });
+      .catch(handleAjaxError);
+  }
+
+  addEvent(newEvent) {
+    axios
+      .post('/api/events.json', newEvent)
+      .then((response) => {
+        success('Event Added!');
+        const savedEvent = response.data;
+        this.setState(prevState => ({
+          events: [...prevState.events, savedEvent],
+        }));
+        const { history } = this.props;
+        history.push(`/events/${savedEvent.id}`);
+      })
+      .catch(handleAjaxError);
+  }
+
+  deleteEvent(eventId) {
+    const sure = window.confirm('Are you sure?');
+    if (sure) {
+      axios
+        .delete(`/api/events/${eventId}.json`)
+        .then((response) => {
+          if (response.status === 204) {
+            success('Event deleted');
+            const { history } = this.props;
+            history.push('/events');
+
+            const { events } = this.state;
+            this.setState({ events: events.filter(event => event.id !== eventId) });
+          }
+        })
+        .catch(handleAjaxError);
+    }
+  }
+
+  updateEvent(updatedEvent) {
+    axios
+      .put(`/api/events/${updatedEvent.id}.json`, updatedEvent)
+      .then(() => {
+        success('Event updated');
+        const { events } = this.state;
+        const idx = events.findIndex(event => event.id === updatedEvent.id);
+        events[idx] = updatedEvent;
+        const { history } = this.props;
+        history.push(`/events/${updatedEvent.id}`);
+        this.setState({ events });
+      })
+      .catch(handleAjaxError);
   }
 
   render() {
@@ -33,17 +87,35 @@ class Editor extends React.Component {
     const event = events.find(e => e.id === Number(eventId));
 
     return (
-        <div>
-          <Header />
-          <EventList events={events} />
-          <PropsRoute path="/events/:id" component={Event} event={event} />
+      <div>
+        <Header />
+        <div className="grid">
+          <EventList events={events} activeId={Number(eventId)} />
+          <Switch>
+            <PropsRoute path="/events/new" component={EventForm} onSubmit={this.addEvent} />
+            <PropsRoute
+              exact
+              path="/events/:id/edit"
+              component={EventForm}
+              event={event}
+              onSubmit={this.updateEvent}
+            />
+            <PropsRoute
+              path="/events/:id"
+              component={Event}
+              event={event}
+              onDelete={this.deleteEvent}
+            />
+          </Switch>
         </div>
+      </div>
     );
   }
 }
 
 Editor.propTypes = {
   match: PropTypes.shape(),
+  history: PropTypes.shape({ push: PropTypes.func }).isRequired,
 };
 
 Editor.defaultProps = {

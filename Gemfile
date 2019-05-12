@@ -66,3 +66,7 @@ gem 'responders'
 
 # Dat Webpack
 gem 'webpacker', '>= 4.0.x'
+
+# Turbolinks for back-button functionality..
+# Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
+gem 'turbolinks', '~> 5'
