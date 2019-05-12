@@ -64,7 +64,7 @@ header h1 a:hover {
 }
 
 .eventList li:hover, a.active {
-    background: #f8e5ce;
+    background: #F2F1F0;
 }
 
 .eventList a {
